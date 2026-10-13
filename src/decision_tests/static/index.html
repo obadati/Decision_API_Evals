@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0070ad">
+  <title>Decision Lab — Model benchmarks</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230070ad'/%3E%3Cpath d='M9 22V16M16 22V10M23 22V13' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="#run" aria-label="Decision Lab home">Decision<span class="brand-light">Lab</span><span class="brand-caption">MODEL BENCHMARKS</span></a>
+    <nav aria-label="Main navigation">
+      <a href="#run" data-nav="run"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 20V10m7 10V4m7 16v-7" stroke-linecap="round"/></svg>Run benchmark</a>
+      <a href="#prompts" data-nav="prompts"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Prompt library<span id="prompt-count" class="nav-count">0</span></a>
+      <a href="#history" data-nav="history"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg>Run history<span id="run-count" class="nav-count">0</span></a>
+      <a href="#config" data-nav="config"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="white"/><circle cx="15" cy="17" r="2" fill="white"/></svg>Configuration</a>
+    </nav>
+  </header>
+  <div class="workspace">
+    <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="breadcrumb-slash">/</span><span id="page-label">Run benchmark</span></div><div class="topbar-actions"><button id="notify-button" class="text-button" type="button" title="Enable browser notifications" aria-label="Enable browser notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Notifications</span></button><span class="local-badge"><span class="status-dot"></span>Local workspace</span></div></header>
+    <main id="content" tabindex="-1"><div class="loading-state"><div class="spinner"></div><p>Opening your workspace…</p></div></main>
+    <footer class="page-footer"><span>Built for decisions. Designed for comparison.</span><span>Your configuration stays on this machine.</span></footer>
+  </div>
+  <div id="run-banner" class="run-banner" hidden aria-live="polite"></div>
+  <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+  <dialog id="confirm-dialog"><form method="dialog"><span class="eyebrow">UNSAVED CHANGES</span><h2>Leave this editor?</h2><p>Your unsaved edits will be lost.</p><div class="button-row"><button value="stay" class="button secondary">Keep editing</button><button value="leave" class="button primary">Leave editor</button></div></form></dialog>
+</body>
+</html>

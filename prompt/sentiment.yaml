@@ -1,0 +1,21 @@
+name: Product review sentiment
+type: choice
+prompt: |
+  Classify the overall sentiment of the product review.
+  Choose mixed if the review contains both clear praise and clear criticism.
+  Choose neutral when it contains no clear positive or negative opinion.
+choices:
+  - positive
+  - negative
+  - mixed
+  - neutral
+dataset: |
+  I love this product. It works perfectly. | positive
+  Excellent quality and very easy to use. | positive
+  It broke after one day and support never replied. | negative
+  This is a complete waste of money. | negative
+  The design is lovely, but the battery life is terrible. | mixed
+  Fast delivery, but the product arrived scratched. | mixed
+  The box contains a cable and an instruction booklet. | neutral
+  I bought the blue version last Tuesday. | neutral
+
