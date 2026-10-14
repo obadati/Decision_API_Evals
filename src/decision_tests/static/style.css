@@ -232,17 +232,18 @@ tr:last-child td { border-bottom: 0; }
 .model-cell strong { display: block; color: var(--ink); font-size: 12px; font-weight: 600; }
 .model-cell small { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
 .model-comparison th, .model-comparison td { padding-left: 18px; padding-right: 18px; }
+.model-comparison th:not(:first-child) { text-align: center; }
 .comparison-model { display: flex; align-items: center; gap: 12px; }
 .comparison-model .provider-logo { width: 30px; height: 30px; margin: 0; }
-.comparison-value { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 30px; }
+.comparison-value { position: relative; display: flex; align-items: center; justify-content: center; min-height: 30px; font-size: 16px; font-weight: 600; line-height: 30px; font-variant-numeric: tabular-nums; text-align: center; }
+.comparison-value > .winner-mark { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); line-height: 0; }
 .model-comparison td.winner-cell { background: #dcebf6; color: #204761; border-bottom-color: #c8dce9; font-weight: 600; }
 .winner-mark { display: inline-flex; align-items: center; flex-shrink: 0; }
 .winner-crown { width: 17px; height: 17px; fill: #d6a12e; stroke: #916615; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .comparison-legend { display: flex; align-items: center; gap: 7px; color: #5c7488; font-size: 10px; white-space: nowrap; }
 .comparison-note { margin: 0; padding: 15px 18px; border-top: 1px solid var(--line); color: var(--muted); background: #f8fbfd; font-size: 10px; line-height: 1.8; }
-.accuracy-value { display: flex; gap: 10px; align-items: center; color: var(--blue); font-weight: 600; }
-.accuracy-track { width: 58px; height: 4px; border-radius: 5px; background: #e2eef6; overflow: hidden; }
-.accuracy-track span { display: block; height: 100%; border-radius: 5px; background: var(--blue); }
+.model-comparison td.accuracy-cell { background: var(--accuracy-background, #f4f7fa); color: #202b35; border-bottom-color: #ffffff80; }
+.accuracy-value { font-size: 23px; font-weight: 700; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
 .report-section { margin-top: 23px; }
 .report-settings { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 26px; }
 .report-settings .pill { background: white; }

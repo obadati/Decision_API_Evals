@@ -60,11 +60,14 @@ CSS structure checks, and all 15 focused frontend/server tests passed.
 ## Comparison winners
 
 The model comparison table now includes an unboxed 30px provider logo beside
-each model and separate columns for average latency, P90 latency, input tokens,
-and output tokens. Each metric's best reported value gets a small gold SVG crown
-and a darker blue cell background. Tied leaders share crowns unless every
-model in the column has the same value; then all cells stay highlighted without
-crowns. A single-model comparison also uses highlighting only.
+each model and separate columns for minimum latency, average latency, P90 latency,
+and input tokens. Output tokens are omitted from the comparison display. Each
+metric highlights its best reported values only when another comparable value
+is worse. A sole leader gets a small gold SVG crown; tied leaders get highlights
+without crowns. Equal columns and single-model comparisons get neither winner
+highlights nor crowns. Except for correctness, winner backgrounds are pale blue.
+Numbers use a larger, centered font. The crown is positioned above the number
+outside normal layout flow, keeping crowned and uncrowned values aligned.
 
 Correct-decision and request-success rates rank highest first; latency, token
 usage, and estimated cost rank lowest first. Missing, negative, nonfinite, and
@@ -73,11 +76,29 @@ only when providers have equal positive request counts, usage coverage is
 complete for the specific token metric, and costs are marked complete. No
 aggregate overall winner is inferred from these independent metrics.
 
-Implementation remained with the primary agent. Bounded behavioral test work
-was delegated requesting `gpt-6-luna` at `max` reasoning, and a fresh read-only
-source/data-contract review requested `gpt-6-luna` at `medium` reasoning. The
-review found no correctness defects. Existing 15 focused frontend/server tests
-passed, along with expanded Node checks covering metric direction, independent
-average/P90 winners, ties, zero values, partial data, unequal workloads, safe
-HTML rendering, accessible crowns, and provider logo placement. Browser preview
-remains unavailable under the previously recorded environment restrictions.
+Correctness uses a larger percentage with no progress bar. The whole cell uses
+a score-dependent shade: red at 50% or below, orange above 50% and below 70%,
+yellow from 70% to below 90%, and green from 90% to 100%. Orange, yellow, and
+green become stronger toward the top of their band; red becomes stronger as
+accuracy falls. The correctness shade takes precedence over winner highlighting,
+while crowns still identify leaders. Missing or invalid accuracy uses a neutral
+background. Minimum latency uses valid responses, like average and P90.
+
+Input tokens remain the sum of each API's reported request usage. Providers receive
+the same instructions, choices, and dataset queries in their API-specific request
+formats, and may tokenize or account for them differently. The table explains
+that these are provider-reported totals. Output usage remains available in raw
+reports for cost calculations.
+
+Implementation and test updates remained with the primary agent. This follow-up
+used bounded read-only token-accounting investigation and review, requesting
+`gpt-6-luna` at `medium` reasoning to isolate independent work. Runtime model
+metadata was not exposed. Review found no functional defects. All 15 focused
+frontend/server tests passed, along with JavaScript syntax and diff whitespace
+checks. Node checks cover independent minimum/average/P90 winners, ties, zero
+values, partial data, unequal workloads, safe HTML rendering, accessible crowns,
+provider logos, correctness band boundaries, shade variation, and invalid scores.
+Browser rendering was not verified; checks validate generated markup and source
+selectors.
+
+This layout and tie-rule refinement stayed solo as a small local change.

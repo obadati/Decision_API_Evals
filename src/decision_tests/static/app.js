@@ -258,45 +258,57 @@ function comparisonWinners(results) {
   const metrics = {
     correct: {higher:true, value:result => result.success_rate, max:100},
     requests: {higher:true, value:result => result.request_success_rate, max:100},
+    min: {value:result => result.latency_ms?.successful?.min},
     avg: {value:result => result.latency_ms?.successful?.avg},
     p90: {value:result => result.latency_ms?.successful?.p90},
     input: {value:result => completeUsage(result, "input_tokens")},
-    output: {value:result => completeUsage(result, "output_tokens")},
     cost: {value:result => sameWorkload && result.cost_complete === true ? result.estimated_cost_usd : null},
   };
   return Object.fromEntries(Object.entries(metrics).map(([key, metric]) => {
     const values = entries.map(([id, result]) => [id, metric.value(result)]).filter(([, value]) => valid(value) && (metric.max == null || value <= metric.max));
-    if (!values.length) return [key, new Set()];
+    if (values.length < 2 || values.every(([, value]) => value === values[0][1])) return [key, new Set()];
     const best = values.reduce((winner, [, value]) => metric.higher ? Math.max(winner, value) : Math.min(winner, value), values[0][1]);
     return [key, new Set(values.filter(([, value]) => value === best).map(([id]) => id))];
   }));
 }
 
+function accuracyAppearance(value) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 100) return null;
+  // Each band moves from pale to saturated; lower red scores are more severe.
+  const [band, hue, strength] = value <= 50 ? ["red", 0, (50 - value) / 50]
+    : value < 70 ? ["orange", 30, (value - 50) / 20]
+    : value < 90 ? ["yellow", 48, (value - 70) / 20]
+    : ["green", 140, (value - 90) / 10];
+  return {band, background:`hsl(${hue}, 80%, ${(94 - strength * 30).toFixed(1)}%)`};
+}
+
 function renderComparisonTable(job, report) {
   const results = report.provider_results || {};
-  const modelCount = Object.keys(results).length;
   const winners = comparisonWinners(results);
   const crown = label => `<span class="winner-mark" role="img" aria-label="${escape(label)}" title="${escape(label)}"><svg class="winner-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 4 4 5-7 5 7 4-4-2 12H5L3 6Z"/><path d="M6 21h12"/></svg></span>`;
-  const cell = (id, metric, content, label) => {
+  const cell = (id, metric, content, label, appearance = null) => {
     const winning = winners[metric].has(id);
-    const crowned = winning && winners[metric].size < modelCount;
-    return `<td${winning ? ' class="winner-cell"' : ""}><div class="comparison-value">${content}${crowned ? crown(`${label}${winners[metric].size > 1 ? " (tied)" : ""}`) : ""}</div></td>`;
+    const crowned = winning && winners[metric].size === 1;
+    const classes = [winning ? "winner-cell" : "", metric === "correct" ? "accuracy-cell" : ""].filter(Boolean).join(" ");
+    const shade = appearance ? ` data-accuracy-band="${appearance.band}" style="--accuracy-background:${appearance.background}"` : "";
+    return `<td${classes ? ` class="${classes}"` : ""}${shade}><div class="comparison-value">${crowned ? crown(label) : ""}${content}</div></td>`;
   };
   const rows = Object.entries(results).map(([id, result]) => {
     const provider = job.providers.find(item => item.id === id);
     const timings = result.latency_ms?.successful || {};
-    const accuracy = Math.min(100, Math.max(0, Number(result.success_rate) || 0));
+    const appearance = accuracyAppearance(result.success_rate);
+    const accuracy = appearance ? `${Number(result.success_rate.toFixed(1))}%` : "—";
     const timing = value => value == null ? "—" : Number(value).toFixed(1);
     return `<tr><td class="model-cell"><div class="comparison-model">${providerLogo(id)}<div><strong>${escape(provider?.name || id)}</strong><small>${escape(result.model)}</small></div></div></td>
-      ${cell(id, "correct", `<div class="accuracy-value">${percent(result.success_rate)}<span class="accuracy-track"><span style="width:${accuracy}%"></span></span></div>`, "Highest correct decision rate")}
+      ${cell(id, "correct", `<span class="accuracy-value">${accuracy}</span>`, "Highest correct decision rate", appearance)}
       ${cell(id, "requests", percent(result.request_success_rate), "Highest request success rate")}
+      ${cell(id, "min", timing(timings.min), "Lowest minimum latency")}
       ${cell(id, "avg", timing(timings.avg), "Lowest average latency")}
       ${cell(id, "p90", timing(timings.p90), "Lowest P90 latency")}
       ${cell(id, "input", partial(result.usage?.input_tokens, result.usage_requests?.input_tokens, result.total_test_runs), "Lowest complete input token total")}
-      ${cell(id, "output", partial(result.usage?.output_tokens, result.usage_requests?.output_tokens, result.total_test_runs), "Lowest complete output token total")}
       ${cell(id, "cost", `${money(result.estimated_cost_usd)}${result.estimated_cost_usd != null && !result.cost_complete ? "*" : ""}`, "Lowest complete cost")}</tr>`;
   }).join("");
-  return `<section class="panel model-comparison"><div class="panel-head"><div><h2>The model comparison</h2><p>Correctness includes failed requests. Timing reflects valid responses.</p></div><span class="comparison-legend">${crown("Best reported value")}Best in column</span></div><div class="table-scroll"><table><thead><tr><th scope="col">Provider / model</th><th scope="col">Correct ↑</th><th scope="col">Requests OK ↑</th><th scope="col">Avg ms ↓</th><th scope="col">P90 ms ↓</th><th scope="col">Input tokens ↓</th><th scope="col">Output tokens ↓</th><th scope="col">Cost USD ↓</th></tr></thead><tbody>${rows || '<tr><td colspan="8">No model results available.</td></tr>'}</tbody></table></div><p class="comparison-note">Best reported values are highlighted. Tied leaders share crowns; when every model ties, only the highlight remains. ↑ Higher is better · ↓ Lower is better. Token and cost totals are ranked only with complete data for equal workloads.</p></section>`;
+  return `<section class="panel model-comparison"><div class="panel-head"><div><h2>The model comparison</h2><p>Correctness includes failed requests. Timing reflects valid responses.</p></div><span class="comparison-legend">${crown("Best reported value")}Best in column</span></div><div class="table-scroll"><table><thead><tr><th scope="col">Provider / model</th><th scope="col">Correct ↑</th><th scope="col">Requests OK ↑</th><th scope="col">Min ms ↓</th><th scope="col">Avg ms ↓</th><th scope="col">P90 ms ↓</th><th scope="col">Input tokens ↓</th><th scope="col">Cost USD ↓</th></tr></thead><tbody>${rows || '<tr><td colspan="8">No model results available.</td></tr>'}</tbody></table></div><p class="comparison-note">Correctness shades: red ≤50%, orange &gt;50–&lt;70%, yellow 70–&lt;90%, green 90–100%. Shades vary with the score. Best reported values in other columns are highlighted. Only a sole leader gets a crown. Tied leaders are highlighted without crowns; columns with equal values have no winner highlight. ↑ Higher is better · ↓ Lower is better. Input tokens are provider-reported totals across requests; models and services can count the same text differently. Token and cost totals are ranked only with complete data for equal workloads.</p></section>`;
 }
 
 async function renderReport(id) {
